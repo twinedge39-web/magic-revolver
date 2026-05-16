@@ -71,9 +71,8 @@ def log_fire(slot_no, spell):
 
 def launch_command(command, cwd):
     subprocess.Popen(
-        command,
+        ["pwsh", "-NoExit", "-Command", command],
         cwd=str(cwd),
-        shell=True,
     )
 
 
