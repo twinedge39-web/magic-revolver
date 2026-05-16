@@ -102,6 +102,33 @@ Example:
 * Right click: edit slot
 * Center click: reload
 
+## Visual customization
+
+The GUI can use a custom background image.
+
+Place a PNG at:
+
+```txt
+assets/revolver_bg.png
+```
+
+Transparent PNGs work well because the window background color can still show through.
+
+Slot button positions are defined in `revolver_gui.py`:
+
+```python
+SLOTS = {
+    1: (109, 52),
+    2: (155, 78),
+    3: (159, 136),
+    4: (109, 166),
+    5: (60, 137),
+    6: (63, 78),
+}
+```
+
+Adjust these coordinates when your background art uses a different chamber layout.
+
 ## Note
 
 MDG is designed as a lightweight local command launcher.

@@ -69,6 +69,14 @@ def log_fire(slot_no, spell):
         f.write(f"command: {spell.get('command', '')}\n")
 
 
+def launch_command(command, cwd):
+    subprocess.Popen(
+        command,
+        cwd=str(cwd),
+        shell=True,
+    )
+
+
 def list_slots():
     data = load_config()
 
@@ -106,10 +114,7 @@ def fire(slot_no):
 
     log_fire(slot_no, spell)
 
-    subprocess.Popen(
-        ["pwsh", "-NoExit", "-Command", command],
-        cwd=str(impact_dir)
-    )
+    launch_command(command, impact_dir)
 
 
 def set_slot(slot_no, name, impact_dir, command):
@@ -130,10 +135,7 @@ def set_slot(slot_no, name, impact_dir, command):
 
 def edit_config():
     ensure_files()
-    subprocess.Popen(
-        ["pwsh", "-NoExit", "-Command", "code spells.json"],
-        cwd=str(BASE_DIR)
-    )
+    launch_command("code spells.json", BASE_DIR)
 
 
 def open_dir():

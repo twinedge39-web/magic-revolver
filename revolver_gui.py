@@ -1,4 +1,6 @@
+import ctypes
 import json
+import sys
 import subprocess
 import tkinter as tk
 from pathlib import Path
@@ -26,16 +28,38 @@ WINDOW_W = 220
 WINDOW_H = 220
 
 SLOTS = {
-    1: (110, 35),
-    2: (175, 72),
-    3: (175, 148),
-    4: (110, 185),
-    5: (45, 148),
-    6: (45, 72),
+    1: (109, 52),
+    2: (155, 78),
+    3: (159, 136),
+    4: (109, 166),
+    5: (60, 137),
+    6: (63, 78),
 }
 
 CENTER = (110, 110)
-R = 20
+R = 21
+
+
+def apply_dark_title_bar(root):
+    if sys.platform != "win32":
+        return
+
+    try:
+        root.update_idletasks()
+        hwnd = ctypes.windll.user32.GetParent(root.winfo_id())
+        value = ctypes.c_int(1)
+
+        for attribute in (20, 19):
+            result = ctypes.windll.dwmapi.DwmSetWindowAttribute(
+                hwnd,
+                attribute,
+                ctypes.byref(value),
+                ctypes.sizeof(value),
+            )
+            if result == 0:
+                break
+    except Exception:
+        pass
 
 
 class RevolverGUI:
@@ -44,6 +68,7 @@ class RevolverGUI:
         self.root.title("MDG")
         self.root.geometry(f"{WINDOW_W}x{WINDOW_H}")
         self.root.resizable(False, False)
+        apply_dark_title_bar(self.root)
 
         self.selected_slot = None
         self.bg_image = None
@@ -126,9 +151,13 @@ class RevolverGUI:
         self.status.set(f"[{slot}] {spell.get('name', 'Unnamed')}")
 
     def fire_slot(self, slot):
+        kwargs = {"cwd": str(BASE_DIR)}
+        if sys.platform == "win32":
+            kwargs["creationflags"] = subprocess.CREATE_NO_WINDOW
+
         subprocess.Popen(
             ["py", "revolver.py", "fire", str(slot)],
-            cwd=str(BASE_DIR)
+            **kwargs
         )
         self.status.set(f"Fired slot {slot}")
 
