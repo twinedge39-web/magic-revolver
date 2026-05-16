@@ -151,13 +151,9 @@ class RevolverGUI:
         self.status.set(f"[{slot}] {spell.get('name', 'Unnamed')}")
 
     def fire_slot(self, slot):
-        kwargs = {"cwd": str(BASE_DIR)}
-        if sys.platform == "win32":
-            kwargs["creationflags"] = subprocess.CREATE_NO_WINDOW
-
         subprocess.Popen(
             ["py", "revolver.py", "fire", str(slot)],
-            **kwargs
+            cwd=str(BASE_DIR)
         )
         self.status.set(f"Fired slot {slot}")
 
