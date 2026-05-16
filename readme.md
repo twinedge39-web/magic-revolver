@@ -107,3 +107,7 @@ Example:
 MDG is designed as a lightweight local command launcher.
 
 For public sharing, prefer committing `spells.example.json` and keeping `spells.json`, logs, and generated caches local.
+
+## License
+
+MIT License
