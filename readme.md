@@ -7,6 +7,8 @@ Each chamber acts as a spell slot that can store and fire local commands.
 
 MDG is designed for fast local workflow execution, project launching, and tool orchestration.
 
+![Magic Revolver overview](assets/screenshot-overview.png)
+
 ## Features
 
 - 6 fixed spell slots
@@ -14,24 +16,36 @@ MDG is designed for fast local workflow execution, project launching, and tool o
 - Double-click command firing
 - Right-click slot editing
 - Fire logging
+- Saved spellbooks
+- Optional local fire sound
+- Always-on-top by default
 - Lightweight local operation
 - PowerShell-friendly workflow
 
 ## Files
 
-- `revolver_gui.py`  
+- `revolver_gui.py`
   Desktop GUI.
 
-- `revolver.py`  
+- `revolver.py`
   Command runner and log writer.
 
-- `spells.json`  
+- `spells.json`
   Local slot configuration. Keep this file private when it contains personal paths or commands.
 
-- `spells.example.json`  
+- `spells.example.json`
   Public-safe sample slot configuration.
 
-- `logs/`  
+- `spellbooks/`
+  Saved slot profiles. Loading a book copies it into `spells.json`.
+
+- `assets/revolver_bg.png`
+  Optional GUI background image.
+
+- `assets/fire.wav`
+  Optional local firing sound. This file is ignored by Git and should be supplied by each user.
+
+- `logs/`
   Fire history.
 
 ## Usage
@@ -64,6 +78,24 @@ Edit config:
 
 ```powershell
 py revolver.py edit
+```
+
+List spellbooks:
+
+```powershell
+py revolver.py list-books
+```
+
+Load a spellbook:
+
+```powershell
+py revolver.py load-book default
+```
+
+Save the active slots as a spellbook:
+
+```powershell
+py revolver.py save-book daily
 ```
 
 ## Codex-style instruction sample
@@ -101,6 +133,28 @@ Example:
 * Double click: fire slot
 * Right click: edit slot
 * Center click: reload
+* Center middle click: toggle always-on-top
+* Center right click: spellbook menu
+
+MDG starts as an always-on-top window so it can stay visible while working in other apps.
+Use center middle click if you want to turn always-on-top off or on again.
+
+Right-clicking a slot opens a compact editor for the slot name, working directory, and command.
+
+## Spellbooks
+
+MDG keeps `spells.json` as the active runtime config.
+
+Saved profiles live in:
+
+```txt
+spellbooks/
+```
+
+Loading a spellbook copies `spellbooks/<name>.json` to `spells.json`.
+Saving a spellbook copies the current `spells.json` to `spellbooks/<name>.json`.
+
+Spellbook names may use Japanese filenames, but path traversal and unsafe filename characters are rejected.
 
 ## Visual customization
 
@@ -128,6 +182,27 @@ SLOTS = {
 ```
 
 Adjust these coordinates when your background art uses a different chamber layout.
+
+## Optional sound
+
+When a slot is fired from the GUI, MDG plays a short sound.
+
+If this file exists, MDG uses it:
+
+```txt
+assets/fire.wav
+```
+
+If it does not exist, MDG falls back to a standard Windows notification sound.
+
+Sound files are not included in this repository. Add your own local `assets/fire.wav` if you want a custom firing sound, and make sure you have the right to use that sound.
+
+## Command safety
+
+MDG runs slot commands through PowerShell on Windows.
+
+Treat each slot as a visible command, not hidden automation.
+Review commands before firing them, especially commands that modify files, change Git history, upload data, edit credentials, or remove content.
 
 ## Note
 

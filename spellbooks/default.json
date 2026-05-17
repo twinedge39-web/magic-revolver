@@ -1,0 +1,34 @@
+{
+  "slots": [
+    {
+      "name": "Open Project",
+      "impact_dir": ".",
+      "command": "explorer ."
+    },
+    {
+      "name": "List Slots",
+      "impact_dir": ".",
+      "command": "py revolver.py list"
+    },
+    {
+      "name": "Edit Spells",
+      "impact_dir": ".",
+      "command": "code spells.json"
+    },
+    {
+      "name": "Open Folder",
+      "impact_dir": ".",
+      "command": "explorer ."
+    },
+    {
+      "name": "Show Help",
+      "impact_dir": ".",
+      "command": "py revolver.py -h"
+    },
+    {
+      "name": "Start MDG",
+      "impact_dir": ".",
+      "command": "py revolver_gui.py"
+    }
+  ]
+}

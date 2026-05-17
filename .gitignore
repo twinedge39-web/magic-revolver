@@ -5,6 +5,7 @@ logs/
 fire_*.log
 
 spells.json
+assets/fire.wav
 
 .venv/
 venv/

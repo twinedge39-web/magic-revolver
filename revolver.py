@@ -7,6 +7,7 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent
 SPELLS_PATH = BASE_DIR / "spells.json"
+SPELLBOOKS_DIR = BASE_DIR / "spellbooks"
 LOG_DIR = BASE_DIR / "logs"
 SLOT_COUNT = 6
 
@@ -25,6 +26,7 @@ DEFAULT_CONFIG = {
 
 def ensure_files():
     LOG_DIR.mkdir(exist_ok=True)
+    SPELLBOOKS_DIR.mkdir(exist_ok=True)
 
     if not SPELLS_PATH.exists():
         save_config(DEFAULT_CONFIG)
@@ -36,6 +38,10 @@ def load_config():
     with SPELLS_PATH.open("r", encoding="utf-8") as f:
         data = json.load(f)
 
+    return normalize_config(data)
+
+
+def normalize_config(data):
     slots = data.get("slots", [])
 
     while len(slots) < SLOT_COUNT:
@@ -52,6 +58,68 @@ def load_config():
 def save_config(data):
     with SPELLS_PATH.open("w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
+
+
+def save_json(path, data):
+    with path.open("w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
+
+
+def spellbook_path(name):
+    raw_name = name.strip()
+    if not raw_name:
+        raise SystemExit("book name is empty")
+
+    path_name = Path(raw_name)
+    if path_name.name != raw_name or raw_name in {".", ".."}:
+        raise SystemExit("book name must not include a path")
+
+    if any(char in raw_name for char in '<>:"|?*'):
+        raise SystemExit("book name contains an invalid character")
+
+    if path_name.suffix and path_name.suffix.lower() != ".json":
+        raise SystemExit("book name extension must be .json")
+
+    stem = path_name.stem if path_name.suffix else raw_name
+    if stem in {".", ".."} or not stem:
+        raise SystemExit("book name is invalid")
+
+    return SPELLBOOKS_DIR / f"{stem}.json"
+
+
+def list_books():
+    ensure_files()
+    books = sorted(path.stem for path in SPELLBOOKS_DIR.glob("*.json") if path.is_file())
+
+    if not books:
+        print("(no spellbooks)")
+        return
+
+    for book in books:
+        print(book)
+
+
+def load_book(name):
+    ensure_files()
+    path = spellbook_path(name)
+
+    if not path.exists():
+        raise SystemExit(f"spellbook not found: {path.stem}")
+
+    with path.open("r", encoding="utf-8") as f:
+        data = normalize_config(json.load(f))
+
+    save_config(data)
+    print(f"Loaded spellbook: {path.stem}")
+
+
+def save_book(name):
+    ensure_files()
+    path = spellbook_path(name)
+    data = load_config()
+
+    save_json(path, data)
+    print(f"Saved spellbook: {path.stem}")
 
 
 def log_fire(slot_no, spell):
@@ -150,6 +218,7 @@ def main():
 
     sub.add_parser("init")
     sub.add_parser("list")
+    sub.add_parser("list-books")
     sub.add_parser("edit")
     sub.add_parser("open")
 
@@ -162,6 +231,12 @@ def main():
     set_p.add_argument("--dir", required=True)
     set_p.add_argument("--cmd", required=True)
 
+    load_book_p = sub.add_parser("load-book")
+    load_book_p.add_argument("name")
+
+    save_book_p = sub.add_parser("save-book")
+    save_book_p.add_argument("name")
+
     args = parser.parse_args()
 
     if args.command == "init":
@@ -171,11 +246,20 @@ def main():
     elif args.command == "list":
         list_slots()
 
+    elif args.command == "list-books":
+        list_books()
+
     elif args.command == "fire":
         fire(args.slot)
 
     elif args.command == "set":
         set_slot(args.slot, args.name, args.dir, args.cmd)
+
+    elif args.command == "load-book":
+        load_book(args.name)
+
+    elif args.command == "save-book":
+        save_book(args.name)
 
     elif args.command == "edit":
         edit_config()
